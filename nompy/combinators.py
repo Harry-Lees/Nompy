@@ -23,6 +23,37 @@ def take_until(
     return inner
 
 
+def take_while(
+    pred: Callable[[str], bool],
+) -> CombinatorResult:
+    """
+    Take elements from the input while the given predicate
+    function evaluates to True.
+    """
+
+    def inner(obj: str) -> tuple[str, str]:
+        _iter = iter(obj)
+        consumed = []
+        try:
+            while token := next(_iter):
+                if pred(token) is False:
+                    break
+
+                consumed.append(token)
+        except StopIteration:
+            return (
+                "".join(consumed),
+                "",
+            )
+        else:
+            return (
+                "".join(consumed),
+                "".join(chain(token, _iter)),
+            )
+
+    return inner
+
+
 def take(n: int = 1) -> CombinatorResult:
     """
     Take `n` elements from the input.
@@ -34,6 +65,26 @@ def take(n: int = 1) -> CombinatorResult:
             "".join(next(_iter) for _ in range(n)),
             "".join(_iter),
         )
+
+    return inner
+
+
+def alt(
+    *args: Combinator,
+) -> Callable[[str], tuple[str, str]]:
+    """
+    Try a sequence of parsers, return the result of the
+    first successful one.
+    """
+
+    def inner(obj: str) -> tuple[str, str]:
+        for arg in args:
+            try:
+                return arg(obj)
+            except ValueError:
+                pass
+
+        raise ValueError("No parsers succeeded")
 
     return inner
 
@@ -99,6 +150,24 @@ def succeeded(
     def inner(obj: str) -> tuple[str, str]:
         result, remaining = first(obj)
         _, remaining = second(remaining)
+
+        return result, remaining
+
+    return inner
+
+
+def preceeded(
+    first: Combinator,
+    second: Combinator,
+) -> CombinatorResult:
+    """
+    Applies two parsers to the input, ensures that the first parser is
+    preceeded by the second parser. Discards the results of the second parser.
+    """
+
+    def inner(obj: str) -> tuple[str, str]:
+        _, remaining = second(obj)
+        result, remaining = first(remaining)
 
         return result, remaining
 
