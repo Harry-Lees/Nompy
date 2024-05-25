@@ -1,8 +1,10 @@
 # Nompy
 
-A Python [parser combinator](https://en.wikipedia.org/wiki/Parser_combinator) library similar to Nom for Rust.
+A Python [parser combinator](https://en.wikipedia.org/wiki/Parser_combinator) library similar to the [Nom](https://github.com/rust-bakery/nom) library in Rust.
 
 ## Examples
+
+### Parse Name
 
 Parse a name and apply a simple transformation.
 
@@ -19,4 +21,19 @@ parser = tuple_(
 result, remaining = parser(to_parse)
 firstname, lastname = result
 print(firstname, lastname)  # John Doe
+```
+
+
+### Parse Phone Number
+
+Parse an MSISDN with preceeding `+`
+
+```python
+from nompy.combinators import preceeded, tag, take_while
+
+to_parse = "+1234567890"
+
+parser = preceeded(take_while(str.isnumeric), tag("+"))
+result, remaining = parser(to_parse)
+print(result)
 ```
