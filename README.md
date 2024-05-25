@@ -18,5 +18,5 @@ parser = tuple_(
 )
 result, remaining = parser(to_parse)
 firstname, lastname = result
-print(firstname, lastname)
+print(firstname, lastname)  # John Doe
 ```
