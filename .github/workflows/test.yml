@@ -38,7 +38,7 @@ jobs:
             contents: read
         steps:
             - name: checkout-repo
-              run: actions/checkout@v3
+              uses: actions/checkout@v3
             - name: install-poetry
               run: pipx install poetry
             - name: setup-python
