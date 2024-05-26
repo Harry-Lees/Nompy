@@ -25,9 +25,7 @@ jobs:
                 python-version-file: pyproject.toml
                 cache: poetry
             - name: install-dependencies
-              run: |
-                poetry env use system
-                poetry install --no-interaction --only dev
+              run: poetry install --no-interaction --only dev
             - name: ruff-check
               run: poetry run ruff check .
             - name: ruff-format
@@ -49,9 +47,7 @@ jobs:
                 python-version-file: pyproject.toml
                 cache: poetry
             - name: install-dependencies
-              run: |
-                poetry env use system
-                poetry install --no-interaction
+              run: poetry install --no-interaction
             - name: pytest
               run: |
                 poetry run coverage run -m pytest . -vv
