@@ -174,6 +174,22 @@ def preceeded(
     return inner
 
 
+def opt(
+    parser: Combinator,
+) -> CombinatorResult:
+    """
+    Makes the given parser optional.
+    """
+
+    def inner(obj: str) -> tuple[None, str]:
+        try:
+            return parser(obj)
+        except ValueError:
+            return None, obj
+
+    return inner
+
+
 if __name__ == "__main__":
     parser = tuple_(
         succeeded(tag("Hello"), tag(" ")),
