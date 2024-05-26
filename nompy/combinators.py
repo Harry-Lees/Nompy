@@ -1,22 +1,21 @@
 from collections.abc import Callable
 from itertools import chain
-from typing import Any, TypeAlias, TypeVar
+from typing import Any, TypeVar
+
+from nompy.utils import CombinatorResult
 
 T = TypeVar("T")
-
-CombinatorResult: TypeAlias = Callable[[str], tuple[T, str]]
-Combinator: TypeAlias = Callable[..., CombinatorResult[T]]
 
 
 def take_while(
     pred: Callable[[str], bool],
-) -> CombinatorResult:
+):
     """
     Take elements from the input while the given predicate
     function evaluates to True.
     """
 
-    def inner(obj: str) -> tuple[str, str]:
+    def inner(obj: str) -> CombinatorResult[str]:
         _iter = iter(obj)
         consumed = []
         try:
@@ -26,12 +25,12 @@ def take_while(
 
                 consumed.append(token)
         except StopIteration:
-            return (
+            return CombinatorResult(
                 "".join(consumed),
                 "",
             )
         else:
-            return (
+            return CombinatorResult(
                 "".join(consumed),
                 "".join(chain(token, _iter)),
             )
@@ -41,7 +40,7 @@ def take_while(
 
 def take_until(
     pred: Callable[[str], bool],
-) -> CombinatorResult:
+):
     """
     Take elements from the input until the given predicate
     returns True.
@@ -50,7 +49,7 @@ def take_until(
     return take_while(lambda x: not pred(x))
 
 
-def take(n: int = 1) -> CombinatorResult:
+def take(n: int = 1) -> Callable[[str], CombinatorResult[str]]:
     """
     Take `n` elements from the input.
     """
@@ -58,12 +57,12 @@ def take(n: int = 1) -> CombinatorResult:
     if n < 0:
         raise ValueError("n must be greater than 0")
 
-    def inner(obj: str) -> tuple[str, str]:
+    def inner(obj: str) -> CombinatorResult[str]:
         if len(obj) < n:
             raise ValueError("Not enough elements in input")
 
         _iter = iter(obj)
-        return (
+        return CombinatorResult(
             "".join(next(_iter) for _ in range(n)),
             "".join(_iter),
         )
@@ -72,14 +71,14 @@ def take(n: int = 1) -> CombinatorResult:
 
 
 def alt(
-    *args: Combinator,
-) -> Callable[[str], tuple[str, str]]:
+    *args: Callable[..., CombinatorResult[Any]],
+) -> Callable[[str], CombinatorResult[Any]]:
     """
     Try a sequence of parsers, return the result of the
     first successful one.
     """
 
-    def inner(obj: str) -> tuple[str, str]:
+    def inner(obj: str) -> CombinatorResult[Any]:
         for arg in args:
             try:
                 return arg(obj)
@@ -92,8 +91,8 @@ def alt(
 
 
 def tuple_(
-    *args: Combinator,
-) -> Callable[[str], tuple[tuple[str, ...], str]]:
+    *args: Callable[..., CombinatorResult[Any]],
+) -> Callable[[str], CombinatorResult[tuple[str, ...]]]:
     """
     Apply a sequence of parsers consecutively and return a tuple
     of the results.
@@ -102,7 +101,7 @@ def tuple_(
     if len(args) < 1:
         raise ValueError("At least one parser is required")
 
-    def inner(obj: str) -> tuple[tuple[str, ...], str]:
+    def inner(obj: str) -> CombinatorResult[tuple[str, ...]]:
         results = []
         initial_func, *rest = args
         result, remaining = initial_func(obj)
@@ -112,83 +111,83 @@ def tuple_(
             result, remaining = arg(remaining)
             results.append(result)
 
-        return tuple(results), remaining
+        return CombinatorResult(tuple(results), remaining)
 
     return inner
 
 
 def tag(
     tag: str,
-) -> CombinatorResult:
-    def inner(obj: str) -> tuple[str, str]:
+) -> Callable[[str], CombinatorResult[str]]:
+    def inner(obj: str) -> CombinatorResult[str]:
         result, remaining = take(len(tag))(obj)
 
         if result != tag:
             raise ValueError("Tokens do not match given tag")
 
-        return result, remaining
+        return CombinatorResult(result, remaining)
 
     return inner
 
 
-def take_rest() -> CombinatorResult:
+def take_rest() -> Callable[[str], CombinatorResult[str]]:
     """
     Consume the remaining input stream
     """
 
-    def inner(obj: str) -> tuple[str, str]:
-        return obj, ""
+    def inner(obj: str) -> CombinatorResult[str]:
+        return CombinatorResult(obj, "")
 
     return inner
 
 
 def succeeded(
-    first: Combinator,
-    second: Combinator,
-) -> CombinatorResult:
+    first: Callable[[str], CombinatorResult[T]],
+    second: Callable[[str], CombinatorResult[Any]],
+) -> Callable[[str], CombinatorResult[T]]:
     """
     Apply two parsers to the given input, and discard the result
     of the second parser.
     """
 
-    def inner(obj: str) -> tuple[str, str]:
+    def inner(obj: str) -> CombinatorResult[T]:
         result, remaining = first(obj)
         _, remaining = second(remaining)
 
-        return result, remaining
+        return CombinatorResult(result, remaining)
 
     return inner
 
 
 def preceeded(
-    parser: Combinator[T],
-    preceeded_by: Combinator[Any],
-) -> CombinatorResult[T]:
+    parser: Callable[[str], CombinatorResult[T]],
+    preceeded_by: Callable[[str], CombinatorResult[Any]],
+) -> Callable[[str], CombinatorResult[T]]:
     """
     Applies two parsers to the input, ensures that the first parser is
     preceeded by the second parser. Discards the results of the second parser.
     """
 
-    def inner(obj: str) -> tuple[T, str]:
+    def inner(obj: str) -> CombinatorResult[T]:
         _, remaining = preceeded_by(obj)
         result, remaining = parser(remaining)
 
-        return result, remaining
+        return CombinatorResult(result, remaining)
 
     return inner
 
 
 def opt(
-    parser: Combinator[T],
-) -> CombinatorResult[T] | CombinatorResult[None]:
+    parser: Callable[[str], CombinatorResult[T]],
+) -> Callable[[str], CombinatorResult[T] | CombinatorResult[None]]:
     """
     Makes the given parser optional.
     """
 
-    def inner(obj: str):
+    def inner(obj: str) -> CombinatorResult[T] | CombinatorResult[None]:
         try:
             return parser(obj)
         except ValueError:
-            return None, obj
+            return CombinatorResult(None, obj)
 
     return inner
