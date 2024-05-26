@@ -1,4 +1,6 @@
-from typing import Generic, NamedTuple, TypeVar
+from typing import Generic, TypeVar
+
+from typing_extensions import NamedTuple
 
 T = TypeVar("T")
 
