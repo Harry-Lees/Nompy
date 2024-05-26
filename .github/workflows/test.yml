@@ -36,6 +36,13 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: read
+        strategy:
+          matrix:
+            python-version:
+              - "3.12"
+              - "3.11"
+              - "3.10"
+          fail-fast: false
         steps:
             - name: checkout-repo
               uses: actions/checkout@v3
@@ -44,7 +51,7 @@ jobs:
             - name: setup-python
               uses: actions/setup-python@v4
               with:
-                python-version-file: pyproject.toml
+                python-version: ${{ matrix.python-version }}
                 cache: poetry
             - name: install-dependencies
               run: poetry install --no-interaction
