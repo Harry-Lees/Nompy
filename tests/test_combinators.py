@@ -174,14 +174,15 @@ def test_take_negative() -> None:
         take(-1)
 
 
-@pytest.mark.skip
 def test_opt_no_input() -> None:
     parser = opt(tag("+"))
     result, remaining = parser("")
-    assert result == None
+    assert result is None
     assert remaining == ""
 
 
-@pytest.mark.skip
 def test_opt_with_input() -> None:
-    pass
+    parser = opt(tag("+"))
+    result, remaining = parser("+")
+    assert result == "+"
+    assert remaining == ""
