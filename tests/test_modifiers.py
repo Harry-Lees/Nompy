@@ -1,4 +1,4 @@
-from nompy.combinators import alt, tag
+from nompy.combinators import tag
 from nompy.modifiers import apply
 
 
