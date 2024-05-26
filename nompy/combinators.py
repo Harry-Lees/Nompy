@@ -188,13 +188,3 @@ def opt(
             return None, obj
 
     return inner
-
-
-if __name__ == "__main__":
-    parser = tuple_(
-        succeeded(tag("Hello"), tag(" ")),
-        take_rest(),
-    )
-    result, rest = parser("Hello World")
-    print(result)
-    print(rest)
