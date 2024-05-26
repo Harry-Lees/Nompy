@@ -1,26 +1,11 @@
 from collections.abc import Callable
 from itertools import chain
-from typing import TypeAlias
+from typing import Any, TypeAlias, TypeVar
 
-CombinatorResult: TypeAlias = Callable[[str], tuple[str, str]]
-Combinator: TypeAlias = Callable[..., CombinatorResult]
+T = TypeVar("T")
 
-
-def take_until(
-    tag: str,
-) -> CombinatorResult:
-    def inner(obj: str) -> tuple[str, str]:
-        _iter = iter(obj)
-        matches = []
-
-        while token := next(_iter):
-            if token == tag:
-                break
-            matches.append(token)
-
-        return ("".join(matches), "".join(chain(token, _iter)))
-
-    return inner
+CombinatorResult: TypeAlias = Callable[[str], tuple[T, str]]
+Combinator: TypeAlias = Callable[..., CombinatorResult[T]]
 
 
 def take_while(
@@ -54,12 +39,29 @@ def take_while(
     return inner
 
 
+def take_until(
+    pred: Callable[[str], bool],
+) -> CombinatorResult:
+    """
+    Take elements from the input until the given predicate
+    returns True.
+    """
+
+    return take_while(lambda x: not pred(x))
+
+
 def take(n: int = 1) -> CombinatorResult:
     """
     Take `n` elements from the input.
     """
 
+    if n < 0:
+        raise ValueError("n must be greater than 0")
+
     def inner(obj: str) -> tuple[str, str]:
+        if len(obj) < n:
+            raise ValueError("Not enough elements in input")
+
         _iter = iter(obj)
         return (
             "".join(next(_iter) for _ in range(n)),
@@ -97,6 +99,9 @@ def tuple_(
     of the results.
     """
 
+    if len(args) < 1:
+        raise ValueError("At least one parser is required")
+
     def inner(obj: str) -> tuple[tuple[str, ...], str]:
         results = []
         initial_func, *rest = args
@@ -116,8 +121,7 @@ def tag(
     tag: str,
 ) -> CombinatorResult:
     def inner(obj: str) -> tuple[str, str]:
-        _iter = iter(obj)
-        result, remaining = take(len(tag))(_iter)
+        result, remaining = take(len(tag))(obj)
 
         if result != tag:
             raise ValueError("Tokens do not match given tag")
@@ -157,17 +161,17 @@ def succeeded(
 
 
 def preceeded(
-    first: Combinator,
-    second: Combinator,
-) -> CombinatorResult:
+    parser: Combinator[T],
+    preceeded_by: Combinator[Any],
+) -> CombinatorResult[T]:
     """
     Applies two parsers to the input, ensures that the first parser is
     preceeded by the second parser. Discards the results of the second parser.
     """
 
-    def inner(obj: str) -> tuple[str, str]:
-        _, remaining = second(obj)
-        result, remaining = first(remaining)
+    def inner(obj: str) -> tuple[T, str]:
+        _, remaining = preceeded_by(obj)
+        result, remaining = parser(remaining)
 
         return result, remaining
 
@@ -175,13 +179,13 @@ def preceeded(
 
 
 def opt(
-    parser: Combinator,
-) -> CombinatorResult:
+    parser: Combinator[T],
+) -> CombinatorResult[T] | CombinatorResult[None]:
     """
     Makes the given parser optional.
     """
 
-    def inner(obj: str) -> tuple[None, str]:
+    def inner(obj: str):
         try:
             return parser(obj)
         except ValueError:
