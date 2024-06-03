@@ -191,3 +191,20 @@ def opt(
             return CombinatorResult(None, obj)
 
     return inner
+
+
+def recognize(
+    parser: Callable[[str], CombinatorResult[Any]],
+) -> Callable[[str], CombinatorResult[str]]:
+    """
+    Parse an input stream and return the parsed values
+    """
+
+    def inner(obj: str) -> CombinatorResult[str]:
+        before = obj
+        _, remaining = parser(obj)
+        processed = before.removesuffix(remaining)
+
+        return CombinatorResult(processed, remaining)
+
+    return inner

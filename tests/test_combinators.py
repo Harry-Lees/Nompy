@@ -4,6 +4,7 @@ from nompy.combinators import (
     alt,
     opt,
     preceeded,
+    recognize,
     succeeded,
     tag,
     take,
@@ -185,4 +186,15 @@ def test_opt_with_input() -> None:
     parser = opt(tag("+"))
     result, remaining = parser("+")
     assert result == "+"
+    assert remaining == ""
+
+
+def test_recognize() -> None:
+    to_parse = "HelloWorld"
+    parser = preceeded(tag("World"), tag("Hello"))
+    result, remaining = parser(to_parse)
+    assert result == "World"
+    assert remaining == ""
+    result, remaining = recognize(parser)(to_parse)
+    assert result == "HelloWorld"
     assert remaining == ""
