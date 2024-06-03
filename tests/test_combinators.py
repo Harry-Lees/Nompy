@@ -2,6 +2,7 @@ import pytest
 
 from nompy.combinators import (
     alt,
+    count,
     opt,
     preceeded,
     recognize,
@@ -197,4 +198,11 @@ def test_recognize() -> None:
     assert remaining == ""
     result, remaining = recognize(parser)(to_parse)
     assert result == "HelloWorld"
+    assert remaining == ""
+
+
+def test_count() -> None:
+    parser = count(tag("Hello"), 3)
+    result, remaining = parser("HelloHelloHello")
+    assert result == ("Hello", "Hello", "Hello")
     assert remaining == ""

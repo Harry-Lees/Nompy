@@ -208,3 +208,23 @@ def recognize(
         return CombinatorResult(processed, remaining)
 
     return inner
+
+
+def count(
+    parser: Callable[[str], CombinatorResult[T]],
+    count: int,
+) -> Callable[[str], CombinatorResult[tuple[T, ...]]]:
+    """
+    Applies the embedded parser `count` number of times, gathering
+    the results in a tuple.
+    """
+
+    def inner(obj: str) -> CombinatorResult[tuple[T, ...]]:
+        results = []
+        for _ in range(count):
+            result, obj = parser(obj)
+            results.append(result)
+
+        return CombinatorResult(tuple(results), obj)
+
+    return inner
