@@ -3,6 +3,7 @@ import pytest
 from nompy.combinators import (
     alt,
     count,
+    none_of,
     opt,
     preceeded,
     recognize,
@@ -205,4 +206,18 @@ def test_count() -> None:
     parser = count(tag("Hello"), 3)
     result, remaining = parser("HelloHelloHello")
     assert result == ("Hello", "Hello", "Hello")
+    assert remaining == ""
+
+
+def test_none_of() -> None:
+    parser = none_of("abc")
+
+    with pytest.raises(ValueError):
+        parser("a")
+
+    with pytest.raises(ValueError):
+        parser("")
+
+    result, remaining = parser("z")
+    assert result == "z"
     assert remaining == ""

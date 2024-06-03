@@ -228,3 +228,24 @@ def count(
         return CombinatorResult(tuple(results), obj)
 
     return inner
+
+
+def none_of(chars: str) -> Callable[[str], CombinatorResult[str]]:
+    """
+    Recognizes a character that is not in the provided characters.
+    Returns an error if there's not enough input data.
+    """
+
+    def inner(obj: str) -> CombinatorResult[str]:
+        if len(obj) < 1:
+            raise ValueError("Not enough elements in input")
+
+        split_chars = set(chars)
+        parsed = obj[0] if obj[0] not in split_chars else None
+
+        if parsed is None:
+            raise ValueError("Character could not be recognized in provided charset")
+
+        return CombinatorResult(parsed, obj[1:])
+
+    return inner
