@@ -130,6 +130,18 @@ def tag(
     return inner
 
 
+def tag_no_case(tag: str) -> Callable[[str], CombinatorResult[str]]:
+    def inner(obj: str) -> CombinatorResult[str]:
+        result, remaining = take(len(tag))(obj)
+
+        if result.lower() != tag.lower():
+            raise ValueError("Tokens do not match given tag")
+
+        return CombinatorResult(result, remaining)
+
+    return inner
+
+
 def take_rest() -> Callable[[str], CombinatorResult[str]]:
     """
     Consume the remaining input stream

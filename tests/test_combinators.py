@@ -9,6 +9,7 @@ from nompy.combinators import (
     recognize,
     succeeded,
     tag,
+    tag_no_case,
     take,
     take_rest,
     take_until,
@@ -221,3 +222,17 @@ def test_none_of() -> None:
     result, remaining = parser("z")
     assert result == "z"
     assert remaining == ""
+
+
+def test_tag_no_case_success() -> None:
+    parser = tag_no_case("Hello")
+    result, remaining = parser("hello")
+
+    assert result == "hello"
+    assert remaining == ""
+
+
+def tag_no_case_failure() -> None:
+    parser = tag_no_case("Hello")
+    with pytest.raises(ValueError):
+        parser("World")
