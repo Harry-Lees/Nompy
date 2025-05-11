@@ -4,18 +4,14 @@ version = "0.1.0"
 description = "A python parser combinator library, similar to Nom for Rust"
 authors = [{ name = "Harry Lees", email = "<harry.lees@gmail.com>" }]
 readme = "README.md"
+license = "BSD-3-Clause"
 requires-python = ">=3.10"
-dependencies = [
-    "more-itertools>=10.2.0",
-    "typing-extensions>=4.12.0",
-]
+dependencies = ["more-itertools>=10.2.0", "typing-extensions>=4.12.0"]
 
 [dependency-groups]
-dev = [
-    "mypy>=1.15.0",
-    "ruff>=0.11.9",
-]
-test = [
-    "coverage>=7.8.0",
-    "pytest>=8.3.5",
-]
+dev = ["mypy>=1.15.0", "ruff>=0.11.9"]
+test = ["coverage>=7.8.0", "pytest>=8.3.5"]
+
+[project.urls]
+Repository = "https://github.com/Harry-Lees/Nompy.git"
+Issues = "https://github.com/Harry-Lees/Nompy/issues"
