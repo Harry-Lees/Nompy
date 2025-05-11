@@ -15,23 +15,20 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: checkout-repo
-        uses: actions/checkout@v3
-      - name: install-poetry
-        run: pipx install poetry
-      - name: setup-python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version-file: pyproject.toml
-          cache: poetry
-      - name: install-dependencies
-        run: poetry install --no-interaction --only dev
+          version: "0.7.3"
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - run: uv sync --all-extras --all-groups
       - name: ruff-check
-        run: poetry run ruff check .
+        run: uv run ruff check .
       - name: ruff-format
-        run: poetry run ruff format --check .
+        run: uv run ruff format --check .
       - name: mypy
-        run: poetry run mypy .
+        run: uv run mypy .
   tests:
     runs-on: ubuntu-latest
     permissions:
@@ -45,18 +42,15 @@ jobs:
           - "3.10"
       fail-fast: false
     steps:
-      - name: checkout-repo
-        uses: actions/checkout@v3
-      - name: install-poetry
-        run: pipx install poetry
-      - name: setup-python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: poetry
-      - name: install-dependencies
-        run: poetry install --no-interaction
+          version: "0.7.3"
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - run: uv sync --all-extras --all-groups
       - name: pytest
         run: |
-          poetry run coverage run -m pytest . -vv
-          poetry run coverage report -m --skip-covered
+          uv run coverage run -m pytest . -vv
+          uv run coverage report -m --skip-covered
