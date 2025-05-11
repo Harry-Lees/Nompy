@@ -1,23 +1,21 @@
-[tool.poetry]
+[project]
 name = "nompy"
 version = "0.1.0"
 description = "A python parser combinator library, similar to Nom for Rust"
-authors = ["Harry Lees <harry.lees@gmail.com>"]
+authors = [{ name = "Harry Lees", email = "<harry.lees@gmail.com>" }]
 readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "more-itertools>=10.2.0",
+    "typing-extensions>=4.12.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10"
-more-itertools = ">=10.2.0"
-typing-extensions = ">=4.12.0"
-
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.10.0"
-ruff = "^0.4.5"
-pytest = "^8.2.1"
-watchfiles = "^0.21.0"
-coverage = "^7.5.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "ruff>=0.11.9",
+]
+test = [
+    "coverage>=7.8.0",
+    "pytest>=8.3.5",
+]
