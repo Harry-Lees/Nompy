@@ -1,5 +1,5 @@
-from nompy.combinators import tag
-from nompy.modifiers import apply
+from nom.combinators import tag
+from nom.modifiers import apply
 
 
 def test_apply_char_input() -> None:
