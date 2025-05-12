@@ -2,7 +2,7 @@ from collections.abc import Callable
 from itertools import chain
 from typing import Any, TypeVar
 
-from nompy.utils import CombinatorResult
+from nom.utils import CombinatorResult
 
 T = TypeVar("T")
 

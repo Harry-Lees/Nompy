@@ -1,6 +1,6 @@
 import pytest
 
-from nompy.combinators import (
+from nom.combinators import (
     alt,
     count,
     none_of,

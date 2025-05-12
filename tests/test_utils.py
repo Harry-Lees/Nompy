@@ -1,4 +1,4 @@
-from nompy.utils import CombinatorResult
+from nom.utils import CombinatorResult
 
 
 def test_combinator_result() -> None:
