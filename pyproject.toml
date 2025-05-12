@@ -1,7 +1,7 @@
 [project]
-name = "nompy"
+name = "nom"
 dynamic = ["version"]
-description = "A python parser combinator library, similar to Nom for Rust"
+description = "A python parser combinator library, inspired by Nom for Rust"
 authors = [{ name = "Harry Lees", email = "harry.lees@gmail.com" }]
 readme = "README.md"
 license = "BSD-3-Clause"
